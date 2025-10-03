@@ -12,6 +12,12 @@ export interface User {
   totalWasteSaved: number;
 }
 
+export interface AuthResponse {
+  success: boolean;
+  user: User;
+  message?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -21,15 +27,35 @@ export class AuthService {
   public currentUser$ = this.currentUserSubject.asObservable();
   private isLoggedInSubject = new BehaviorSubject<boolean>(false);
   public isLoggedIn$ = this.isLoggedInSubject.asObservable();
+  private showRegisterSubject = new BehaviorSubject<boolean>(false);
+  public showRegister$ = this.showRegisterSubject.asObservable();
 
   constructor(private http: HttpClient) {
     // Check if user is stored in localStorage
     this.loadUserFromStorage();
   }
 
-  login(username: string): Observable<{success: boolean, user: User}> {
+  register(username: string, password: string): Observable<AuthResponse> {
     return new Observable(observer => {
-      this.http.post<{success: boolean, user: User}>(`${this.apiUrl}/login`, { username })
+      this.http.post<AuthResponse>(`${this.apiUrl}/register`, { username, password })
+        .subscribe({
+          next: (response) => {
+            if (response.success) {
+              this.setCurrentUser(response.user);
+            }
+            observer.next(response);
+            observer.complete();
+          },
+          error: (error) => {
+            observer.error(error);
+          }
+        });
+    });
+  }
+
+  login(username: string, password: string): Observable<AuthResponse> {
+    return new Observable(observer => {
+      this.http.post<AuthResponse>(`${this.apiUrl}/login`, { username, password })
         .subscribe({
           next: (response) => {
             if (response.success) {
@@ -49,6 +75,7 @@ export class AuthService {
     localStorage.removeItem('currentUser');
     this.currentUserSubject.next(null);
     this.isLoggedInSubject.next(false);
+    this.showRegisterSubject.next(false);
   }
 
   getCurrentUser(): User | null {
@@ -57,6 +84,18 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     return this.isLoggedInSubject.value;
+  }
+
+  switchToRegister(): void {
+    this.showRegisterSubject.next(true);
+  }
+
+  switchToLogin(): void {
+    this.showRegisterSubject.next(false);
+  }
+
+  isShowingRegister(): boolean {
+    return this.showRegisterSubject.value;
   }
 
   private setCurrentUser(user: User): void {

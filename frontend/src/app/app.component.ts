@@ -3,17 +3,19 @@ import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { LoginComponent } from './components/login/login.component';
+import { RegisterComponent } from './components/register/register.component';
 import { HeaderComponent } from './components/header/header.component';
 import { AuthService } from './services/auth.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule, DashboardComponent, LoginComponent, HeaderComponent],
+  imports: [RouterOutlet, CommonModule, DashboardComponent, LoginComponent, RegisterComponent, HeaderComponent],
   template: `
     <div class="app-container" *ngIf="!isLoading">
       <div *ngIf="!isLoggedIn" class="auth-view">
-        <app-login></app-login>
+        <app-login *ngIf="!showRegister"></app-login>
+        <app-register *ngIf="showRegister"></app-register>
       </div>
       
       <div *ngIf="isLoggedIn" class="main-view">
@@ -78,6 +80,7 @@ import { AuthService } from './services/auth.service';
 export class AppComponent implements OnInit {
   title = 'everyday-impact-frontend';
   isLoggedIn = false;
+  showRegister = false;
   isLoading = true;
 
   constructor(private authService: AuthService) {}
@@ -88,6 +91,10 @@ export class AppComponent implements OnInit {
       this.authService.isLoggedIn$.subscribe(loggedIn => {
         this.isLoggedIn = loggedIn;
         this.isLoading = false;
+      });
+
+      this.authService.showRegister$.subscribe(showRegister => {
+        this.showRegister = showRegister;
       });
     }, 100);
   }
