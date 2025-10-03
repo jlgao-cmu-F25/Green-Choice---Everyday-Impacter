@@ -100,6 +100,15 @@
       <div class="actions-section">
         <h2>Log Your Eco-Actions</h2>
         <div class="action-grid">
+          <!-- Special Bike Action Button -->
+          <button
+            class="action-button bike-action-button"
+            (click)="showBikeAction()">
+            <span class="action-icon">🚴‍♂️</span>
+            <span class="action-name">Bike Ride</span>
+            <span class="action-impact">Calculate CO₂ savings</span>
+          </button>
+          
           @for (action of ecoActions; track action) {
             <button
               class="action-button"
@@ -134,3 +143,8 @@
     </div>
   }
 </div>
+
+<!-- Bike Action Modal -->
+<app-bike-action 
+  (bikeRideLogged)="onBikeRideLogged($event)">
+</app-bike-action>

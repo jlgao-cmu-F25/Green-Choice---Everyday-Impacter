@@ -297,3 +297,15 @@
 .leaderboard-button:active {
   transform: translateY(0);
 }
+
+/* Special styling for bike action button */
+.bike-action-button {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  border: 2px solid rgba(79, 172, 254, 0.3);
+}
+
+.bike-action-button:hover {
+  background: linear-gradient(135deg, #43a7fc 0%, #00e8fc 100%);
+  border-color: rgba(79, 172, 254, 0.5);
+  box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
+}

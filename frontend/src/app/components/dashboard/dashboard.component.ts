@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
@@ -6,15 +6,18 @@ import { ApiService } from '../../services/api.service';
 import { AuthService, User } from '../../services/auth.service';
 import { EcoAction, UserStats, Impact } from '../../models/eco-action.model';
 import { HeaderComponent } from "../header/header.component";
+import { BikeActionComponent } from '../bike-action/bike-action.component';
 
 @Component({
     selector: 'app-dashboard',
     standalone: true,
-    imports: [HeaderComponent],
+    imports: [HeaderComponent, BikeActionComponent],
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
+  @ViewChild(BikeActionComponent) bikeActionComponent!: BikeActionComponent;
+  
   currentUser: User | null = null;
   ecoActions: EcoAction[] = [];
   userStats: UserStats | null = null;
@@ -107,5 +110,27 @@ export class DashboardComponent implements OnInit {
 
   navigateToLeaderboard() {
     this.router.navigate(['/leaderboard']);
+  }
+
+  showBikeAction() {
+    this.bikeActionComponent.showModal();
+  }
+
+  onBikeRideLogged(event: {distance: number, co2Saved: number}) {
+    if (!this.currentUser) return;
+
+    // For now, we'll simulate logging a bike action
+    // In a real app, you'd probably want to create a custom endpoint for bike rides
+    // or find an existing bike action to log with appropriate quantity
+    
+    // Show success message
+    alert(`Great job! You biked ${event.distance.toFixed(2)} km and saved ${event.co2Saved.toFixed(2)} kg of CO₂!`);
+    
+    // Update the current impact locally (this would normally come from the server)
+    this.todayImpact.co2 += event.co2Saved;
+    this.weekImpact.co2 += event.co2Saved;
+    
+    // Optionally reload all data to get updated stats from server
+    this.loadData();
   }
 }
