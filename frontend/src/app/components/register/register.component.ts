@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -265,7 +266,7 @@ export class RegisterComponent {
   isLoading = false;
   errorMessage = '';
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private router: Router) {}
 
   canRegister(): boolean {
     return this.username.trim().length >= 3 && 
@@ -285,7 +286,8 @@ export class RegisterComponent {
       next: (response) => {
         this.isLoading = false;
         if (response.success) {
-          // Registration successful - AuthService will handle the state change
+          // Navigate to dashboard on successful registration
+          this.router.navigate(['/dashboard']);
         } else {
           this.errorMessage = 'Registration failed. Please try again.';
         }
@@ -303,6 +305,6 @@ export class RegisterComponent {
   }
 
   switchToLogin() {
-    this.authService.switchToLogin();
+    this.router.navigate(['/login']);
   }
 }

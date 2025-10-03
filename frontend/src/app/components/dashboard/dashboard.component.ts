@@ -5,10 +5,12 @@ import { Router } from '@angular/router';
 import { ApiService } from '../../services/api.service';
 import { AuthService, User } from '../../services/auth.service';
 import { EcoAction, UserStats, Impact } from '../../models/eco-action.model';
+import { HeaderComponent } from "../header/header.component";
 
 @Component({
     selector: 'app-dashboard',
-    imports: [CommonModule],
+    standalone: true,
+    imports: [HeaderComponent],
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.css']
 })
