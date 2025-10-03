@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -226,7 +227,7 @@ export class LoginComponent {
   isLoading = false;
   errorMessage = '';
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private router: Router) {}
 
   onLogin() {
     if (!this.username.trim() || !this.password) {
@@ -240,7 +241,8 @@ export class LoginComponent {
       next: (response) => {
         this.isLoading = false;
         if (response.success) {
-          // Login successful - AuthService will handle the state change
+          // Navigate to dashboard on successful login
+          this.router.navigate(['/dashboard']);
         } else {
           this.errorMessage = 'Login failed. Please try again.';
         }
@@ -258,6 +260,6 @@ export class LoginComponent {
   }
 
   switchToRegister() {
-    this.authService.switchToRegister();
+    this.router.navigate(['/register']);
   }
 }
