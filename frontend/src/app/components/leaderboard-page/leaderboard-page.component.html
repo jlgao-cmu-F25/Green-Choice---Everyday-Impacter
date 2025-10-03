@@ -1,0 +1,90 @@
+<app-header></app-header>
+<div class="leaderboard-page">
+  <header class="page-header">
+    <h1>🏆 Leaderboard</h1>
+    <button class="back-button" (click)="goBack()">← Back to Dashboard</button>
+  </header>
+
+  <!-- Period Selection -->
+  <div class="period-selector">
+    <h3>Select Period:</h3>
+    <div class="period-buttons">
+      <button 
+        (click)="changePeriod('today')" 
+        [class.active]="selectedPeriod === 'today'"
+        class="period-btn">
+        Today
+      </button>
+      <button 
+        (click)="changePeriod('week')" 
+        [class.active]="selectedPeriod === 'week'"
+        class="period-btn">
+        This Week
+      </button>
+      <button 
+        (click)="changePeriod('month')" 
+        [class.active]="selectedPeriod === 'month'"
+        class="period-btn">
+        This Month
+      </button>
+      <button 
+        (click)="changePeriod('alltime')" 
+        [class.active]="selectedPeriod === 'alltime'"
+        class="period-btn">
+        All Time
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading) {
+    <div class="loading">Loading leaderboard...</div>
+  }
+
+  <!-- Error State -->
+  @if (error) {
+    <div class="error">{{ error }}</div>
+  }
+
+  <!-- Leaderboard Content -->
+  @if (!loading && !error) {
+    <div class="leaderboard-content">
+      @if (leaderboard.length > 0) {
+        <div class="leaderboard-table">
+          <div class="table-header">
+            <div class="rank-col">Rank</div>
+            <div class="user-col">User</div>
+            <div class="co2-col">CO₂ Saved (kg)</div>
+            <div class="water-col">Water Saved (L)</div>
+            <div class="waste-col">Waste Reduced (kg)</div>
+          </div>
+          
+          @for (entry of leaderboard; track entry.userId; let i = $index) {
+            <div class="table-row" [class.top-three]="i < 3">
+              <div class="rank-col">
+                @if (i === 0) {
+                  🥇 {{ i + 1 }}
+                } @else if (i === 1) {
+                  🥈 {{ i + 1 }}
+                } @else if (i === 2) {
+                  🥉 {{ i + 1 }}
+                } @else {
+                  {{ i + 1 }}
+                }
+              </div>
+              <div class="user-col">{{ entry.username }}</div>
+              <div class="co2-col">{{ entry.totalCO2.toFixed(2) }}</div>
+              <div class="water-col">{{ entry.totalWater.toFixed(1) }}</div>
+              <div class="waste-col">{{ entry.totalWaste.toFixed(2) }}</div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="no-data">
+          <p>No data available for the selected period.</p>
+          <p>Start logging eco-actions to see the leaderboard!</p>
+        </div>
+      }
+    </div>
+  }
+</div>

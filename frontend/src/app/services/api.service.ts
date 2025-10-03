@@ -34,4 +34,10 @@ export class ApiService {
   getUserStats(userId: string): Observable<UserStats> {
     return this.http.get<UserStats>(`${this.apiUrl}/users/${userId}/stats`);
   }
+
+  getLeaderboard(period: 'today' | 'week' | 'month' | 'alltime' = 'week', limit: number = 10) {
+    return this.http.get<{ period: string; limit: number; leaderboard: any[] }>(
+      `${this.apiUrl}/leaderboard?period=${period}&limit=${limit}`
+    );
+  }
 }
