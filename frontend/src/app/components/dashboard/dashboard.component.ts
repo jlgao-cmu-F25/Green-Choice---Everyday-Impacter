@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 import { ApiService } from '../../services/api.service';
 import { AuthService, User } from '../../services/auth.service';
@@ -6,7 +8,7 @@ import { EcoAction, UserStats, Impact } from '../../models/eco-action.model';
 
 @Component({
     selector: 'app-dashboard',
-    imports: [],
+    imports: [CommonModule],
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.css']
 })
@@ -21,7 +23,8 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private apiService: ApiService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -98,5 +101,9 @@ export class DashboardComponent implements OnInit {
       },
       error: (err) => console.error('Error logging action:', err)
     });
+  }
+
+  navigateToLeaderboard() {
+    this.router.navigate(['/leaderboard']);
   }
 }
