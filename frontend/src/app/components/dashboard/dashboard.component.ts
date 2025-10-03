@@ -132,4 +132,10 @@ export class DashboardComponent implements OnInit {
   navigateToLeaderboard() {
     this.router.navigate(['/leaderboard']);
   }
+
+  // Calculate progress percentage for today vs week
+  getProgressPercentage(todayValue: number, weekValue: number): number {
+    if (weekValue === 0) return 0;
+    return Math.min(Math.round((todayValue / weekValue) * 100), 100);
+  }
 }
