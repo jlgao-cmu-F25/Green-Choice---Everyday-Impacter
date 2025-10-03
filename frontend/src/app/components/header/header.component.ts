@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Router } from '@angular/router';
 import { AuthService, User } from '../../services/auth.service';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <header class="app-header">
       <div class="header-content">
@@ -17,29 +17,31 @@ import { AuthService, User } from '../../services/auth.service';
             <p class="tagline">Every small action counts!</p>
           </div>
         </div>
-        
-        <div class="user-section" *ngIf="currentUser">
-          <div class="user-info">
-            <span class="welcome-text">Welcome back,</span>
-            <span class="username">{{ currentUser.username }}!</span>
-          </div>
-          <div class="user-stats">
-            <div class="stat-item">
-              <span class="stat-value">{{ currentUser.currentStreak }}</span>
-              <span class="stat-label">Day Streak</span>
+    
+        @if (currentUser) {
+          <div class="user-section">
+            <div class="user-info">
+              <span class="welcome-text">Welcome back,</span>
+              <span class="username">{{ currentUser.username }}!</span>
             </div>
-            <div class="stat-item">
-              <span class="stat-value">{{ currentUser.totalCO2Saved.toFixed(1) }}</span>
-              <span class="stat-label">kg CO₂ Saved</span>
+            <div class="user-stats">
+              <div class="stat-item">
+                <span class="stat-value">{{ currentUser.currentStreak }}</span>
+                <span class="stat-label">Day Streak</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">{{ currentUser.totalCO2Saved.toFixed(1) }}</span>
+                <span class="stat-label">kg CO₂ Saved</span>
+              </div>
             </div>
+            <button class="logout-button" (click)="logout()">
+              🚪 Logout
+            </button>
           </div>
-          <button class="logout-button" (click)="logout()">
-            🚪 Logout
-          </button>
-        </div>
+        }
       </div>
     </header>
-  `,
+    `,
   styles: [`
     .app-header {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);

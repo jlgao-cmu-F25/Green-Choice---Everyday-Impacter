@@ -1,20 +1,22 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-
-import { ApiService } from '../../services/api.service';
-import { AuthService, User } from '../../services/auth.service';
-import { EcoAction, UserStats, Impact } from '../../models/eco-action.model';
+import { Component, OnInit, ViewChild } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { Router } from "@angular/router";
+import { ApiService } from "../../services/api.service";
+import { AuthService, User } from "../../services/auth.service";
+import { EcoAction, UserStats, Impact } from "../../models/eco-action.model";
 import { HeaderComponent } from "../header/header.component";
+import { BikeActionComponent } from "../bike-action/bike-action.component";
 
 @Component({
-    selector: 'app-dashboard',
-    standalone: true,
-    imports: [CommonModule, HeaderComponent],
-    templateUrl: './dashboard.component.html',
-    styleUrls: ['./dashboard.component.css']
+  selector: "app-dashboard",
+  standalone: true,
+  imports: [CommonModule, HeaderComponent, BikeActionComponent],
+  templateUrl: "./dashboard.component.html",
+  styleUrls: ["./dashboard.component.css"],
 })
 export class DashboardComponent implements OnInit {
+  @ViewChild(BikeActionComponent) bikeActionComponent!: BikeActionComponent;
+
   currentUser: User | null = null;
   ecoActions: EcoAction[] = [];
   userStats: UserStats | null = null;
@@ -30,7 +32,7 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.authService.currentUser$.subscribe(user => {
+    this.authService.currentUser$.subscribe((user) => {
       this.currentUser = user;
       if (user) {
         this.loadData();
@@ -40,7 +42,7 @@ export class DashboardComponent implements OnInit {
 
   loadData() {
     if (!this.currentUser) return;
-    
+
     this.loading = true;
 
     // Load available actions
@@ -48,7 +50,7 @@ export class DashboardComponent implements OnInit {
       next: (actions) => {
         this.ecoActions = actions;
       },
-      error: (err) => console.error('Error loading actions:', err)
+      error: (err) => console.error("Error loading actions:", err),
     });
 
     // Load user stats
@@ -58,41 +60,41 @@ export class DashboardComponent implements OnInit {
       },
       error: (err) => {
         // User doesn't exist yet - that's okay
-        console.log('No stats yet for user');
-      }
+        console.log("No stats yet for user");
+      },
     });
 
     // Load today's impact
-    this.apiService.getUserActions(this.currentUser.userId, 'today').subscribe({
+    this.apiService.getUserActions(this.currentUser.userId, "today").subscribe({
       next: (data) => {
         this.todayImpact = data.totalImpact;
       },
-      error: (err) => console.log('No actions today yet')
+      error: (err) => console.log("No actions today yet"),
     });
 
     // Load week's impact
-    this.apiService.getUserActions(this.currentUser.userId, 'week').subscribe({
+    this.apiService.getUserActions(this.currentUser.userId, "week").subscribe({
       next: (data) => {
         this.weekImpact = data.totalImpact;
         this.insights = data.insights;
         this.loading = false;
       },
       error: (err) => {
-        console.log('No actions this week yet');
+        console.log("No actions this week yet");
         this.loading = false;
-      }
+      },
     });
   }
 
   logAction(action: EcoAction) {
     if (!this.currentUser) return;
-    
+
     this.apiService.logAction(this.currentUser.userId, action._id).subscribe({
       next: (response) => {
-        console.log('Action logged:', response);
+        console.log("Action logged:", response);
         // Show insight
         if (response.insight && response.insight.length > 0) {
-          alert('Great job! ' + response.insight[0]);
+          alert("Great job! " + response.insight[0]);
         }
         // Update user stats in auth service if they changed
         if (response.updatedUser) {
@@ -101,7 +103,7 @@ export class DashboardComponent implements OnInit {
         // Reload data
         this.loadData();
       },
-      error: (err) => console.error('Error logging action:', err)
+      error: (err) => console.error("Error logging action:", err),
     });
   }
 
@@ -121,7 +123,9 @@ export class DashboardComponent implements OnInit {
       return "Almost a full tree's worth of CO₂ saved! 🌳";
     } else if (treesSaved < 5) {
       const trees = Math.floor(treesSaved);
-      return `Equivalent to ${trees} tree${trees > 1 ? 's' : ''} worth of CO₂ absorption! 🌲🌳`;
+      return `Equivalent to ${trees} tree${
+        trees > 1 ? "s" : ""
+      } worth of CO₂ absorption! 🌲🌳`;
     } else if (treesSaved < 10) {
       return "You've saved a small forest! 🌲🌳🌲";
     } else {
@@ -130,12 +134,50 @@ export class DashboardComponent implements OnInit {
   }
 
   navigateToLeaderboard() {
-    this.router.navigate(['/leaderboard']);
+    this.router.navigate(["/leaderboard"]);
   }
 
   // Calculate progress percentage for today vs week
   getProgressPercentage(todayValue: number, weekValue: number): number {
     if (weekValue === 0) return 0;
     return Math.min(Math.round((todayValue / weekValue) * 100), 100);
+  }
+
+  showBikeAction() {
+    this.bikeActionComponent.showModal();
+  }
+
+  onBikeRideLogged(event: { distance: number; co2Saved: number }) {
+    if (!this.currentUser) return;
+
+    // Log the bike ride using the dedicated API endpoint
+    this.apiService
+      .logBikeRide(this.currentUser.userId, event.distance, event.co2Saved)
+      .subscribe({
+        next: (response) => {
+          console.log("Bike ride logged:", response);
+
+          // Show success message with insight
+          let message = `Great job! You biked ${event.distance.toFixed(
+            2
+          )} km and saved ${event.co2Saved.toFixed(2)} kg of CO₂!`;
+          if (response.insight && response.insight.length > 0) {
+            message += "\n\n" + response.insight[0];
+          }
+          alert(message);
+
+          // Update user stats in auth service if they changed
+          if (response.updatedUser) {
+            this.authService.updateUser(response.updatedUser);
+          }
+
+          // Reload data to get updated stats from server
+          this.loadData();
+        },
+        error: (err) => {
+          console.error("Error logging bike ride:", err);
+          alert("There was an error logging your bike ride. Please try again.");
+        },
+      });
   }
 }

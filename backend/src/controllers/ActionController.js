@@ -125,6 +125,75 @@ class ActionController {
       res.status(500).json({ error: error.message });
     }
   }
+
+  async logBikeRide(req, res) {
+    try {
+      const { userId, distance, co2Saved } = req.body;
+
+      if (!userId || !distance || !co2Saved) {
+        return res.status(400).json({ error: 'userId, distance, and co2Saved are required' });
+      }
+
+      // Create a dynamic bike action for this specific ride
+      const bikeAction = {
+        name: `Bike Ride (${distance.toFixed(2)} km)`,
+        category: 'transportation',
+        co2Saved: co2Saved,
+        waterSaved: 0,
+        wasteSaved: 0,
+        icon: '🚴‍♂️',
+        description: `Biked ${distance.toFixed(2)} km instead of driving`
+      };
+
+      // Create user action
+      const userAction = await UserAction.create({
+        userId,
+        actionId: 'bike-ride-custom',
+        actionName: bikeAction.name,
+        quantity: 1,
+        co2SavedTotal: co2Saved,
+        waterSavedTotal: 0,
+        wasteSavedTotal: 0,
+        customData: { distance: distance }
+      });
+
+      // Update or create user
+      let user = await User.findByUserId(userId);
+      if (!user) {
+        user = await User.create({ userId, username: userId });
+      }
+
+      // Update totals
+      const updatedUser = {
+        ...user,
+        totalCO2Saved: user.totalCO2Saved + co2Saved,
+        totalWaterSaved: user.totalWaterSaved,
+        totalWasteSaved: user.totalWasteSaved
+      };
+
+      // Update streak
+      streakService.updateStreak(updatedUser, userAction.date);
+
+      await User.update(userId, updatedUser);
+
+      res.status(201).json({
+        userAction,
+        updatedUser,
+        impact: {
+          co2: co2Saved,
+          water: 0,
+          waste: 0
+        },
+        insight: impactCalculator.generateInsight({
+          co2: co2Saved,
+          water: 0,
+          waste: 0
+        })
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
 }
 
 module.exports = new ActionController();

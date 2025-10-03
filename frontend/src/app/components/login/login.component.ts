@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -7,7 +7,7 @@ import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   template: `
     <div class="login-container">
       <div class="login-card">
@@ -16,59 +16,65 @@ import { AuthService } from '../../services/auth.service';
           <h2>Everyday Impacter</h2>
           <p>Track your eco-friendly actions and make a difference!</p>
         </div>
-        
+    
         <form (ngSubmit)="onLogin()" class="login-form">
           <div class="form-group">
             <label for="username">Username</label>
-            <input 
+            <input
               id="username"
-              type="text" 
-              [(ngModel)]="username" 
+              type="text"
+              [(ngModel)]="username"
               name="username"
               placeholder="Your username"
               class="form-input"
               [disabled]="isLoading"
               required
-            >
+              >
+            </div>
+    
+            <div class="form-group">
+              <label for="password">Password</label>
+              <input
+                id="password"
+                type="password"
+                [(ngModel)]="password"
+                name="password"
+                placeholder="Your password"
+                class="form-input"
+                [disabled]="isLoading"
+                required
+                >
+              </div>
+    
+              <button
+                type="submit"
+                class="login-button"
+                [disabled]="!username.trim() || !password || isLoading"
+                >
+                @if (!isLoading) {
+                  <span>🚀 Sign In</span>
+                }
+                @if (isLoading) {
+                  <span>⏳ Signing In...</span>
+                }
+              </button>
+    
+              @if (errorMessage) {
+                <div class="error-message">
+                  {{ errorMessage }}
+                </div>
+              }
+            </form>
+    
+            <div class="login-footer">
+              <p>Don't have an account?</p>
+              <button class="link-button" (click)="switchToRegister()" [disabled]="isLoading">
+                Create Account
+              </button>
+            </div>
           </div>
-          
-          <div class="form-group">
-            <label for="password">Password</label>
-            <input 
-              id="password"
-              type="password" 
-              [(ngModel)]="password" 
-              name="password"
-              placeholder="Your password"
-              class="form-input"
-              [disabled]="isLoading"
-              required
-            >
-          </div>
-          
-          <button 
-            type="submit" 
-            class="login-button"
-            [disabled]="!username.trim() || !password || isLoading"
-          >
-            <span *ngIf="!isLoading">🚀 Sign In</span>
-            <span *ngIf="isLoading">⏳ Signing In...</span>
-          </button>
-          
-          <div *ngIf="errorMessage" class="error-message">
-            {{ errorMessage }}
-          </div>
-        </form>
-        
-        <div class="login-footer">
-          <p>Don't have an account?</p>
-          <button class="link-button" (click)="switchToRegister()" [disabled]="isLoading">
-            Create Account
-          </button>
         </div>
-      </div>
-    </div>
-  `,
+    `,
   styles: [`
     .login-container {
       min-height: 100vh;

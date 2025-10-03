@@ -38,7 +38,17 @@ class UserActionModel {
     // Populate actionId with actual eco action data
     const populated = actions.map(action => ({
       ...action,
-      actionId: dataStore.ecoActions.find(ea => ea._id === action.actionId)
+      actionId: action.actionId === 'bike-ride-custom' 
+        ? {
+            _id: 'bike-ride-custom',
+            name: action.actionName || 'Custom Bike Ride',
+            category: 'transportation',
+            co2Saved: action.co2SavedTotal,
+            waterSaved: 0,
+            wasteSaved: 0,
+            icon: '🚴‍♂️'
+          }
+        : dataStore.ecoActions.find(ea => ea._id === action.actionId)
     }));
 
     return Promise.resolve(populated);

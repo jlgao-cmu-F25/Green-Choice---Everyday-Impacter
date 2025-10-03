@@ -40,4 +40,12 @@ export class ApiService {
       `${this.apiUrl}/leaderboard?period=${period}&limit=${limit}`
     );
   }
+
+  logBikeRide(userId: string, distance: number, co2Saved: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/actions/log-bike-ride`, {
+      userId,
+      distance,
+      co2Saved
+    });
+  }
 }

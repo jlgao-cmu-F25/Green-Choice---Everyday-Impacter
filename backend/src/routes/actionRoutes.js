@@ -8,6 +8,9 @@ router.get('/actions', actionController.getAllActions);
 // Log a new action
 router.post('/actions/log', actionController.logAction);
 
+// Log a custom bike ride
+router.post('/actions/log-bike-ride', actionController.logBikeRide);
+
 // Get user's actions with optional period filter
 router.get('/users/:userId/actions', actionController.getUserActions);
 
