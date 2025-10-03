@@ -12,6 +12,10 @@ import { AuthService, User } from '../../services/auth.service';
       <div class="header-content">
         <div class="logo-section">
           <h1>🌱 Green Choice</h1>
+          <div class="title-section">
+            <h2>🌍 Everyday Impact Calculator</h2>
+            <p class="tagline">Every small action counts!</p>
+          </div>
         </div>
     
         @if (currentUser) {
@@ -55,10 +59,30 @@ import { AuthService, User } from '../../services/auth.service';
       align-items: center;
     }
 
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+    }
+
     .logo-section h1 {
       margin: 0;
       font-size: 1.8rem;
       font-weight: 700;
+    }
+
+    .title-section h2 {
+      margin: 0 0 5px 0;
+      font-size: 1.4rem;
+      font-weight: 600;
+      opacity: 0.95;
+    }
+
+    .title-section .tagline {
+      margin: 0;
+      font-size: 0.9rem;
+      opacity: 0.8;
+      font-style: italic;
     }
 
     .user-section {
@@ -136,6 +160,11 @@ import { AuthService, User } from '../../services/auth.service';
         text-align: center;
       }
 
+      .logo-section {
+        flex-direction: column;
+        gap: 15px;
+      }
+
       .user-section {
         flex-direction: column;
         gap: 15px;
@@ -151,6 +180,14 @@ import { AuthService, User } from '../../services/auth.service';
 
       .logo-section h1 {
         font-size: 1.5rem;
+      }
+
+      .title-section h2 {
+        font-size: 1.2rem;
+      }
+
+      .title-section .tagline {
+        font-size: 0.8rem;
       }
     }
 

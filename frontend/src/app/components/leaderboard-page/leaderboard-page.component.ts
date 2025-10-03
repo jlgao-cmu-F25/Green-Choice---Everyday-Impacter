@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-
+import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ApiService } from '../../services/api.service';
+import { HeaderComponent } from '../header/header.component';
 
 @Component({
   selector: 'app-leaderboard-page',
   standalone: true,
-  imports: [],
+  imports: [CommonModule, HeaderComponent],
   templateUrl: './leaderboard-page.component.html',
   styleUrls: ['./leaderboard-page.component.css']
 })

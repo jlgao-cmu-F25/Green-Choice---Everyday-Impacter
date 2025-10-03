@@ -1,92 +1,11 @@
 <app-header/>
 <div class="container">
-  <header class="header">
-    <h1>🌍 Everyday Impact Calculator</h1>
-    <p class="tagline">Every small action counts!</p>
-  </header>
-
   @if (loading) {
     <div class="loading">Loading...</div>
   }
 
   @if (!loading) {
     <div>
-      <!-- Streak Display -->
-      @if (userStats) {
-        <div class="streak-card">
-          <div class="streak-info">
-            <div class="streak-item">
-              <span class="streak-emoji">🔥</span>
-              <div>
-                <div class="streak-number">{{ userStats.currentStreak }}</div>
-                <div class="streak-label">Day Streak</div>
-              </div>
-            </div>
-            <div class="streak-item">
-              <span class="streak-emoji">🏆</span>
-              <div>
-                <div class="streak-number">{{ userStats.longestStreak }}</div>
-                <div class="streak-label">Best Streak</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      }
-      <!-- Impact Summary -->
-      <div class="impact-grid">
-        <div class="impact-card">
-          <h3>Today's Impact</h3>
-          <div class="impact-stats">
-            <div class="stat">
-              <span class="stat-icon">💨</span>
-              <span class="stat-value">{{ todayImpact.co2.toFixed(2) }} kg</span>
-              <span class="stat-label">CO₂ Saved</span>
-            </div>
-            <div class="stat">
-              <span class="stat-icon">💧</span>
-              <span class="stat-value">{{ todayImpact.water.toFixed(1) }} L</span>
-              <span class="stat-label">Water Saved</span>
-            </div>
-            <div class="stat">
-              <span class="stat-icon">♻️</span>
-              <span class="stat-value">{{ todayImpact.waste.toFixed(2) }} kg</span>
-              <span class="stat-label">Waste Reduced</span>
-            </div>
-          </div>
-        </div>
-        <div class="impact-card">
-          <h3>This Week</h3>
-          <div class="impact-stats">
-            <div class="stat">
-              <span class="stat-icon">💨</span>
-              <span class="stat-value">{{ weekImpact.co2.toFixed(2) }} kg</span>
-              <span class="stat-label">CO₂ Saved</span>
-            </div>
-            <div class="stat">
-              <span class="stat-icon">💧</span>
-              <span class="stat-value">{{ weekImpact.water.toFixed(1) }} L</span>
-              <span class="stat-label">Water Saved</span>
-            </div>
-            <div class="stat">
-              <span class="stat-icon">♻️</span>
-              <span class="stat-value">{{ weekImpact.waste.toFixed(2) }} kg</span>
-              <span class="stat-label">Waste Reduced</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- Insights -->
-      @if (insights.length > 0) {
-        <div class="insights-card">
-          <h3>💡 Your Impact This Week</h3>
-          <ul class="insights-list">
-            @for (insight of insights; track insight) {
-              <li>{{ insight }}</li>
-            }
-          </ul>
-        </div>
-      }
-      
       <!-- Navigation to Leaderboard -->
       <div class="impact-card leaderboard-nav">
         <h3>🏆 Leaderboard</h3>
@@ -140,6 +59,205 @@
           </div>
         </div>
       }
+      
+      <!-- Trees Saved Section -->
+      @if (userStats && userStats.totalCO2Saved > 0) {
+        <div class="trees-saved-section">
+          <div class="trees-hero">
+            <div class="trees-animation">
+              <span class="tree">🌲</span>
+              <span class="tree">🌳</span>
+              <span class="tree">🌿</span>
+              <span class="tree">🌱</span>
+            </div>
+            <h2 class="trees-title">CO2s you saved is equivalent to: </h2>
+            <div class="trees-count">
+              <span class="trees-number">{{ calculateTreesSaved(userStats.totalCO2Saved).toFixed(1) }}</span>
+              <span class="trees-label">Tree Equivalents</span>
+            </div>
+            <p class="trees-message">{{ getTreesMessage(calculateTreesSaved(userStats.totalCO2Saved)) }}</p>
+            <div class="trees-explanation">
+              <p>Based on the fact that an average tree absorbs ~22kg of CO₂ per year</p>
+            </div>
+          </div>
+        </div>
+      }
+      
+      <!-- Streak Display -->
+      @if (userStats) {
+        <div class="streak-card">
+          <div class="streak-info">
+            <div class="streak-item">
+              <span class="streak-emoji">🔥</span>
+              <div>
+                <div class="streak-number">{{ userStats.currentStreak }}</div>
+                <div class="streak-label">Day Streak</div>
+              </div>
+            </div>
+            <div class="streak-item">
+              <span class="streak-emoji">🏆</span>
+              <div>
+                <div class="streak-number">{{ userStats.longestStreak }}</div>
+                <div class="streak-label">Best Streak</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+      
+      <!-- Beautiful Bottom Impact Journey -->
+      <div class="bottom-impact-journey">
+        <div class="journey-header">
+          <h2 class="journey-title">📊 Your Environmental Journey</h2>
+          <p class="journey-subtitle">Track your daily and weekly progress</p>
+        </div>
+        
+        <div class="impact-timeline">
+          <!-- Today's Impact Card -->
+          <div class="timeline-card today-card">
+            <div class="card-header">
+              <div class="header-left">
+                <span class="period-icon">☀️</span>
+                <div class="header-text">
+                  <h3>Today's Impact</h3>
+                  <span class="period-badge">Last 24 Hours</span>
+                </div>
+              </div>
+              <div class="progress-ring">
+                <div class="ring-progress" [style.--progress]="getProgressPercentage(todayImpact.co2, weekImpact.co2)"></div>
+                <span class="progress-text">{{ getProgressPercentage(todayImpact.co2, weekImpact.co2) }}%</span>
+              </div>
+            </div>
+            
+            <div class="impact-metrics">
+              <div class="metric-item co2-metric">
+                <div class="metric-visual">
+                  <span class="metric-icon">💨</span>
+                  <div class="metric-bar">
+                    <div class="bar-fill co2-fill" [style.width.%]="getProgressPercentage(todayImpact.co2, weekImpact.co2)"></div>
+                  </div>
+                </div>
+                <div class="metric-content">
+                  <span class="metric-value">{{ todayImpact.co2.toFixed(2) }}</span>
+                  <span class="metric-unit">kg CO₂</span>
+                  <span class="metric-label">Saved Today</span>
+                </div>
+              </div>
+              
+              <div class="metric-item water-metric">
+                <div class="metric-visual">
+                  <span class="metric-icon">💧</span>
+                  <div class="metric-bar">
+                    <div class="bar-fill water-fill" [style.width.%]="getProgressPercentage(todayImpact.water, weekImpact.water)"></div>
+                  </div>
+                </div>
+                <div class="metric-content">
+                  <span class="metric-value">{{ todayImpact.water.toFixed(1) }}</span>
+                  <span class="metric-unit">L Water</span>
+                  <span class="metric-label">Conserved</span>
+                </div>
+              </div>
+              
+              <div class="metric-item waste-metric">
+                <div class="metric-visual">
+                  <span class="metric-icon">♻️</span>
+                  <div class="metric-bar">
+                    <div class="bar-fill waste-fill" [style.width.%]="getProgressPercentage(todayImpact.waste, weekImpact.waste)"></div>
+                  </div>
+                </div>
+                <div class="metric-content">
+                  <span class="metric-value">{{ todayImpact.waste.toFixed(2) }}</span>
+                  <span class="metric-unit">kg Waste</span>
+                  <span class="metric-label">Reduced</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- This Week's Impact Card -->
+          <div class="timeline-card week-card">
+            <div class="card-header">
+              <div class="header-left">
+                <span class="period-icon">📅</span>
+                <div class="header-text">
+                  <h3>This Week's Impact</h3>
+                  <span class="period-badge">7 Days Total</span>
+                </div>
+              </div>
+              <div class="achievement-badge">
+                <span class="badge-icon">🏅</span>
+                <span class="badge-text">Weekly</span>
+              </div>
+            </div>
+            
+            <div class="impact-metrics">
+              <div class="metric-item co2-metric">
+                <div class="metric-visual">
+                  <span class="metric-icon">💨</span>
+                  <div class="metric-bar full-bar">
+                    <div class="bar-fill co2-fill-full"></div>
+                  </div>
+                </div>
+                <div class="metric-content">
+                  <span class="metric-value">{{ weekImpact.co2.toFixed(2) }}</span>
+                  <span class="metric-unit">kg CO₂</span>
+                  <span class="metric-label">Total This Week</span>
+                </div>
+              </div>
+              
+              <div class="metric-item water-metric">
+                <div class="metric-visual">
+                  <span class="metric-icon">💧</span>
+                  <div class="metric-bar full-bar">
+                    <div class="bar-fill water-fill-full"></div>
+                  </div>
+                </div>
+                <div class="metric-content">
+                  <span class="metric-value">{{ weekImpact.water.toFixed(1) }}</span>
+                  <span class="metric-unit">L Water</span>
+                  <span class="metric-label">Total This Week</span>
+                </div>
+              </div>
+              
+              <div class="metric-item waste-metric">
+                <div class="metric-visual">
+                  <span class="metric-icon">♻️</span>
+                  <div class="metric-bar full-bar">
+                    <div class="bar-fill waste-fill-full"></div>
+                  </div>
+                </div>
+                <div class="metric-content">
+                  <span class="metric-value">{{ weekImpact.waste.toFixed(2) }}</span>
+                  <span class="metric-unit">kg Waste</span>
+                  <span class="metric-label">Total This Week</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Weekly Insights Section -->
+        @if (insights.length > 0) {
+          <div class="insights-showcase">
+            <div class="insights-header">
+              <span class="insights-icon">💡</span>
+              <h3>Weekly Insights & Achievements</h3>
+              <div class="insights-count">{{ insights.length }}</div>
+            </div>
+            <div class="insights-container">
+              @for (insight of insights; track insight; let i = $index) {
+                <div class="insight-card" [style.animation-delay]="i * 0.1 + 's'">
+                  <span class="insight-number">{{ i + 1 }}</span>
+                  <div class="insight-content">
+                    <span class="insight-sparkle">✨</span>
+                    <p class="insight-text">{{ insight }}</p>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
     </div>
   }
 </div>
