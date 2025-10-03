@@ -22,7 +22,7 @@ The following are automatically included:
 
 ### Bike Action Modal
 - **Location Input**: Users can enter start and end locations (addresses, landmarks, etc.)
-- **Distance Calculation**: Uses Google Maps to calculate the cycling distance between locations
+- **Distance Calculation**: Uses OpenStreetMap services (Nominatim for geocoding and Haversine formula) to calculate the straight-line distance between locations
 - **CO₂ Savings**: Automatically calculates CO₂ savings based on distance (0.21 kg CO₂ per km vs driving)
 - **Impact Preview**: Shows distance and CO₂ savings before logging
 
