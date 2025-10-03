@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 import { ApiService } from '../../services/api.service';
 import { AuthService, User } from '../../services/auth.service';
@@ -23,7 +25,8 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private apiService: ApiService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -100,5 +103,9 @@ export class DashboardComponent implements OnInit {
       },
       error: (err) => console.error('Error logging action:', err)
     });
+  }
+
+  navigateToLeaderboard() {
+    this.router.navigate(['/leaderboard']);
   }
 }

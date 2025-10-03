@@ -5,6 +5,10 @@ import { RegisterComponent } from './components/register/register.component';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
+  { 
+    path: 'leaderboard', 
+    loadComponent: () => import('./components/leaderboard-page/leaderboard-page.component').then(m => m.LeaderboardPageComponent) 
+  },
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
