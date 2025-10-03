@@ -3,10 +3,12 @@ import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../../services/api.service';
 import { AuthService, User } from '../../services/auth.service';
 import { EcoAction, UserStats, Impact } from '../../models/eco-action.model';
+import { HeaderComponent } from "../header/header.component";
 
 @Component({
     selector: 'app-dashboard',
-    imports: [],
+    standalone: true,
+    imports: [HeaderComponent],
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.css']
 })
