@@ -1,86 +1,94 @@
 import { Component, EventEmitter, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-bike-action',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   template: `
-    <div class="bike-action-modal" *ngIf="isVisible">
-      <div class="modal-overlay" (click)="closeModal()"></div>
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2>🚴‍♂️ Log Your Bike Ride</h2>
-          <button class="close-button" (click)="closeModal()">×</button>
-        </div>
-        
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="startLocation">Start Location</label>
-            <input 
-              id="startLocation"
-              type="text" 
-              [(ngModel)]="startLocation"
-              name="startLocation"
-              placeholder="e.g., Carnegie Mellon University"
-              class="location-input"
-              required
-            >
+    @if (isVisible) {
+      <div class="bike-action-modal">
+        <div class="modal-overlay" (click)="closeModal()"></div>
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>🚴‍♂️ Log Your Bike Ride</h2>
+            <button class="close-button" (click)="closeModal()">×</button>
           </div>
-          
-          <div class="form-group">
-            <label for="endLocation">End Location</label>
-            <input 
-              id="endLocation"
-              type="text" 
-              [(ngModel)]="endLocation"
-              name="endLocation"
-              placeholder="e.g., Pittsburgh International Airport"
-              class="location-input"
-              required
-            >
-          </div>
-          
-          <div *ngIf="distance > 0" class="distance-display">
-            <div class="distance-info">
-              <span class="distance-icon">📏</span>
-              <span class="distance-text">Distance: {{ distance.toFixed(2) }} km</span>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="startLocation">Start Location</label>
+              <input
+                id="startLocation"
+                type="text"
+                [(ngModel)]="startLocation"
+                name="startLocation"
+                placeholder="e.g., Carnegie Mellon University"
+                class="location-input"
+                required
+                >
             </div>
-            <div class="impact-preview">
-              <span class="impact-icon">💨</span>
-              <span class="impact-text">CO₂ Saved: {{ (distance * 0.21).toFixed(2) }} kg</span>
+            <div class="form-group">
+              <label for="endLocation">End Location</label>
+              <input
+                id="endLocation"
+                type="text"
+                [(ngModel)]="endLocation"
+                name="endLocation"
+                placeholder="e.g., Pittsburgh International Airport"
+                class="location-input"
+                required
+                >
             </div>
+            @if (distance > 0) {
+              <div class="distance-display">
+                <div class="distance-info">
+                  <span class="distance-icon">📏</span>
+                  <span class="distance-text">Distance: {{ distance.toFixed(2) }} km</span>
+                </div>
+                <div class="impact-preview">
+                  <span class="impact-icon">💨</span>
+                  <span class="impact-text">CO₂ Saved: {{ (distance * 0.21).toFixed(2) }} kg</span>
+                </div>
+              </div>
+            }
+            @if (errorMessage) {
+              <div class="error-message">
+                {{ errorMessage }}
+              </div>
+            }
           </div>
-          
-          <div *ngIf="errorMessage" class="error-message">
-            {{ errorMessage }}
+          <div class="modal-footer">
+            <button
+              class="calculate-button"
+              (click)="calculateDistance()"
+              [disabled]="!startLocation.trim() || !endLocation.trim() || isCalculating"
+              >
+              @if (!isCalculating) {
+                <span>📍 Calculate Distance</span>
+              }
+              @if (isCalculating) {
+                <span>🔄 Calculating...</span>
+              }
+            </button>
+            <button
+              class="log-button"
+              (click)="logBikeRide()"
+              [disabled]="distance <= 0 || isLogging"
+              >
+              @if (!isLogging) {
+                <span>🚴‍♂️ Log Bike Ride</span>
+              }
+              @if (isLogging) {
+                <span>⏳ Logging...</span>
+              }
+            </button>
           </div>
-        </div>
-        
-        <div class="modal-footer">
-          <button 
-            class="calculate-button" 
-            (click)="calculateDistance()"
-            [disabled]="!startLocation.trim() || !endLocation.trim() || isCalculating"
-          >
-            <span *ngIf="!isCalculating">📍 Calculate Distance</span>
-            <span *ngIf="isCalculating">🔄 Calculating...</span>
-          </button>
-          
-          <button 
-            class="log-button" 
-            (click)="logBikeRide()"
-            [disabled]="distance <= 0 || isLogging"
-          >
-            <span *ngIf="!isLogging">🚴‍♂️ Log Bike Ride</span>
-            <span *ngIf="isLogging">⏳ Logging...</span>
-          </button>
         </div>
       </div>
-    </div>
-  `,
+    }
+    `,
   styles: [`
     .bike-action-modal {
       position: fixed;

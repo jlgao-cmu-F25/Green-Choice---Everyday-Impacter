@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -7,7 +7,7 @@ import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   template: `
     <div class="register-container">
       <div class="register-card">
@@ -16,14 +16,14 @@ import { AuthService } from '../../services/auth.service';
           <h2>Create Your Account</h2>
           <p>Start your eco-friendly journey today!</p>
         </div>
-        
+    
         <form (ngSubmit)="onRegister()" class="register-form">
           <div class="form-group">
             <label for="username">Choose a Username</label>
-            <input 
+            <input
               id="username"
-              type="text" 
-              [(ngModel)]="username" 
+              type="text"
+              [(ngModel)]="username"
               name="username"
               placeholder="Your unique username"
               class="form-input"
@@ -31,67 +31,75 @@ import { AuthService } from '../../services/auth.service';
               required
               minlength="3"
               maxlength="20"
-            >
-            <small class="input-hint">3-20 characters, letters and numbers only</small>
+              >
+              <small class="input-hint">3-20 characters, letters and numbers only</small>
+            </div>
+    
+            <div class="form-group">
+              <label for="password">Create a Password</label>
+              <input
+                id="password"
+                type="password"
+                [(ngModel)]="password"
+                name="password"
+                placeholder="At least 6 characters"
+                class="form-input"
+                [disabled]="isLoading"
+                required
+                minlength="6"
+                >
+                <small class="input-hint">Minimum 6 characters</small>
+              </div>
+    
+              <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input
+                  id="confirmPassword"
+                  type="password"
+                  [(ngModel)]="confirmPassword"
+                  name="confirmPassword"
+                  placeholder="Repeat your password"
+                  class="form-input"
+                  [class.error]="confirmPassword && password !== confirmPassword"
+                  [disabled]="isLoading"
+                  required
+                  >
+                  @if (confirmPassword && password !== confirmPassword) {
+                    <small class="input-hint error">
+                      Passwords don't match
+                    </small>
+                  }
+                </div>
+    
+                <button
+                  type="submit"
+                  class="register-button"
+                  [disabled]="!canRegister() || isLoading"
+                  >
+                  @if (!isLoading) {
+                    <span>🚀 Create Account</span>
+                  }
+                  @if (isLoading) {
+                    <span>⏳ Creating Account...</span>
+                  }
+                </button>
+    
+                @if (errorMessage) {
+                  <div class="error-message">
+                    {{ errorMessage }}
+                  </div>
+                }
+              </form>
+    
+              <div class="register-footer">
+                <p>Already have an account?</p>
+                <button class="link-button" (click)="switchToLogin()" [disabled]="isLoading">
+                  Sign In Instead
+                </button>
+              </div>
+            </div>
           </div>
-          
-          <div class="form-group">
-            <label for="password">Create a Password</label>
-            <input 
-              id="password"
-              type="password" 
-              [(ngModel)]="password" 
-              name="password"
-              placeholder="At least 6 characters"
-              class="form-input"
-              [disabled]="isLoading"
-              required
-              minlength="6"
-            >
-            <small class="input-hint">Minimum 6 characters</small>
-          </div>
-          
-          <div class="form-group">
-            <label for="confirmPassword">Confirm Password</label>
-            <input 
-              id="confirmPassword"
-              type="password" 
-              [(ngModel)]="confirmPassword" 
-              name="confirmPassword"
-              placeholder="Repeat your password"
-              class="form-input"
-              [class.error]="confirmPassword && password !== confirmPassword"
-              [disabled]="isLoading"
-              required
-            >
-            <small class="input-hint error" *ngIf="confirmPassword && password !== confirmPassword">
-              Passwords don't match
-            </small>
-          </div>
-          
-          <button 
-            type="submit" 
-            class="register-button"
-            [disabled]="!canRegister() || isLoading"
-          >
-            <span *ngIf="!isLoading">🚀 Create Account</span>
-            <span *ngIf="isLoading">⏳ Creating Account...</span>
-          </button>
-          
-          <div *ngIf="errorMessage" class="error-message">
-            {{ errorMessage }}
-          </div>
-        </form>
-        
-        <div class="register-footer">
-          <p>Already have an account?</p>
-          <button class="link-button" (click)="switchToLogin()" [disabled]="isLoading">
-            Sign In Instead
-          </button>
-        </div>
-      </div>
-    </div>
-  `,
+    `,
   styles: [`
     .register-container {
       min-height: 100vh;
