@@ -119,18 +119,30 @@ export class DashboardComponent implements OnInit {
   onBikeRideLogged(event: {distance: number, co2Saved: number}) {
     if (!this.currentUser) return;
 
-    // For now, we'll simulate logging a bike action
-    // In a real app, you'd probably want to create a custom endpoint for bike rides
-    // or find an existing bike action to log with appropriate quantity
-    
-    // Show success message
-    alert(`Great job! You biked ${event.distance.toFixed(2)} km and saved ${event.co2Saved.toFixed(2)} kg of CO₂!`);
-    
-    // Update the current impact locally (this would normally come from the server)
-    this.todayImpact.co2 += event.co2Saved;
-    this.weekImpact.co2 += event.co2Saved;
-    
-    // Optionally reload all data to get updated stats from server
-    this.loadData();
+    // Log the bike ride using the dedicated API endpoint
+    this.apiService.logBikeRide(this.currentUser.userId, event.distance, event.co2Saved).subscribe({
+      next: (response) => {
+        console.log('Bike ride logged:', response);
+        
+        // Show success message with insight
+        let message = `Great job! You biked ${event.distance.toFixed(2)} km and saved ${event.co2Saved.toFixed(2)} kg of CO₂!`;
+        if (response.insight && response.insight.length > 0) {
+          message += '\n\n' + response.insight[0];
+        }
+        alert(message);
+        
+        // Update user stats in auth service if they changed
+        if (response.updatedUser) {
+          this.authService.updateUser(response.updatedUser);
+        }
+        
+        // Reload data to get updated stats from server
+        this.loadData();
+      },
+      error: (err) => {
+        console.error('Error logging bike ride:', err);
+        alert('There was an error logging your bike ride. Please try again.');
+      }
+    });
   }
 }

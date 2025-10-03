@@ -1,12 +1,14 @@
 import { Component, EventEmitter, Output } from '@angular/core';
-
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-bike-action',
   standalone: true,
-  imports: [FormsModule],
+  imports: [CommonModule, FormsModule],
   template: `
     @if (isVisible) {
       <div class="bike-action-modal">
@@ -19,27 +21,69 @@ import { HttpClient } from '@angular/common/http';
           <div class="modal-body">
             <div class="form-group">
               <label for="startLocation">Start Location</label>
-              <input
-                id="startLocation"
-                type="text"
-                [(ngModel)]="startLocation"
-                name="startLocation"
-                placeholder="e.g., Carnegie Mellon University"
-                class="location-input"
-                required
-                >
+              <div class="autocomplete-container">
+                <input
+                  id="startLocation"
+                  type="text"
+                  [(ngModel)]="startLocation"
+                  name="startLocation"
+                  placeholder="e.g., Carnegie Mellon University"
+                  class="location-input"
+                  (input)="onStartLocationInput($event)"
+                  (keydown)="onStartKeyDown($event)"
+                  (focus)="onStartFocus()"
+                  (blur)="onStartBlur()"
+                  required
+                  autocomplete="off"
+                  >
+                @if (showStartSuggestions && startSuggestions.length > 0) {
+                  <div class="suggestions-dropdown">
+                    @for (suggestion of startSuggestions; track suggestion.osm_id; let i = $index) {
+                      <div 
+                        class="suggestion-item"
+                        [class.selected]="selectedStartIndex === i"
+                        (mousedown)="selectStartSuggestion(suggestion)"
+                        (mouseenter)="selectedStartIndex = i"
+                        >
+                        <span class="suggestion-text">{{ suggestion.display_name }}</span>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
             </div>
             <div class="form-group">
               <label for="endLocation">End Location</label>
-              <input
-                id="endLocation"
-                type="text"
-                [(ngModel)]="endLocation"
-                name="endLocation"
-                placeholder="e.g., Pittsburgh International Airport"
-                class="location-input"
-                required
-                >
+              <div class="autocomplete-container">
+                <input
+                  id="endLocation"
+                  type="text"
+                  [(ngModel)]="endLocation"
+                  name="endLocation"
+                  placeholder="e.g., Pittsburgh International Airport"
+                  class="location-input"
+                  (input)="onEndLocationInput($event)"
+                  (keydown)="onEndKeyDown($event)"
+                  (focus)="onEndFocus()"
+                  (blur)="onEndBlur()"
+                  required
+                  autocomplete="off"
+                  >
+                @if (showEndSuggestions && endSuggestions.length > 0) {
+                  <div class="suggestions-dropdown">
+                    @for (suggestion of endSuggestions; track suggestion.osm_id; let i = $index) {
+                      <div 
+                        class="suggestion-item"
+                        [class.selected]="selectedEndIndex === i"
+                        (mousedown)="selectEndSuggestion(suggestion)"
+                        (mouseenter)="selectedEndIndex = i"
+                        >
+                        <span class="suggestion-text">{{ suggestion.display_name }}</span>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
             </div>
             @if (distance > 0) {
               <div class="distance-display">
@@ -184,6 +228,59 @@ import { HttpClient } from '@angular/common/http';
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
 
+    .autocomplete-container {
+      position: relative;
+    }
+
+    .suggestions-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+    }
+
+    .suggestion-item {
+      padding: 12px 16px;
+      cursor: pointer;
+      border-bottom: 1px solid #f1f5f9;
+      transition: background-color 0.2s;
+      display: flex;
+      align-items: center;
+    }
+
+    .suggestion-item:hover,
+    .suggestion-item.selected {
+      background-color: #f8fafc;
+    }
+
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+
+    .suggestion-text {
+      color: #4a5568;
+      font-size: 14px;
+      line-height: 1.4;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .suggestion-item.selected .suggestion-text {
+      color: #2d3748;
+      font-weight: 500;
+    }
+
     .distance-display {
       background: #f0fff4;
       border: 1px solid #9ae6b4;
@@ -274,6 +371,19 @@ import { HttpClient } from '@angular/common/http';
       .modal-footer {
         flex-direction: column;
       }
+
+      .suggestions-dropdown {
+        max-height: 150px;
+        font-size: 14px;
+      }
+
+      .suggestion-item {
+        padding: 10px 12px;
+      }
+
+      .suggestion-text {
+        font-size: 13px;
+      }
     }
   `]
 })
@@ -289,7 +399,39 @@ export class BikeActionComponent {
   isLogging = false;
   errorMessage = '';
 
-  constructor(private http: HttpClient) {}
+  // Autocomplete properties
+  startSuggestions: any[] = [];
+  endSuggestions: any[] = [];
+  showStartSuggestions = false;
+  showEndSuggestions = false;
+  selectedStartIndex = -1;
+  selectedEndIndex = -1;
+  private startSearchSubject = new Subject<string>();
+  private endSearchSubject = new Subject<string>();
+
+  constructor(private http: HttpClient) {
+    // Setup debounced search for start location
+    this.startSearchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(term => this.searchAddresses(term))
+    ).subscribe(suggestions => {
+      this.startSuggestions = suggestions;
+      this.showStartSuggestions = suggestions.length > 0;
+      this.selectedStartIndex = -1;
+    });
+
+    // Setup debounced search for end location
+    this.endSearchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(term => this.searchAddresses(term))
+    ).subscribe(suggestions => {
+      this.endSuggestions = suggestions;
+      this.showEndSuggestions = suggestions.length > 0;
+      this.selectedEndIndex = -1;
+    });
+  }
 
   ngOnInit() {
     // No initialization needed for OpenStreetMap services
@@ -398,6 +540,21 @@ export class BikeActionComponent {
     return degrees * (Math.PI / 180);
   }
 
+  private async searchAddresses(query: string): Promise<any[]> {
+    if (!query || query.length < 2) {
+      return [];
+    }
+
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`;
+      const response = await this.http.get<any[]>(url).toPromise();
+      return response || [];
+    } catch (error) {
+      console.error('Address search error:', error);
+      return [];
+    }
+  }
+
   logBikeRide() {
     if (this.distance <= 0) {
       return;
@@ -426,5 +583,134 @@ export class BikeActionComponent {
     this.errorMessage = '';
     this.isCalculating = false;
     this.isLogging = false;
+    this.hideAllSuggestions();
+  }
+
+  // Autocomplete event handlers
+  onStartLocationInput(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const value = target.value;
+    this.distance = 0; // Reset distance when location changes
+    if (value.length >= 2) {
+      this.startSearchSubject.next(value);
+    } else {
+      this.hideStartSuggestions();
+    }
+  }
+
+  onEndLocationInput(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const value = target.value;
+    this.distance = 0; // Reset distance when location changes
+    if (value.length >= 2) {
+      this.endSearchSubject.next(value);
+    } else {
+      this.hideEndSuggestions();
+    }
+  }
+
+  onStartFocus() {
+    if (this.startLocation.length >= 2 && this.startSuggestions.length > 0) {
+      this.showStartSuggestions = true;
+    }
+  }
+
+  onEndFocus() {
+    if (this.endLocation.length >= 2 && this.endSuggestions.length > 0) {
+      this.showEndSuggestions = true;
+    }
+  }
+
+  onStartBlur() {
+    // Delay hiding to allow for click events on suggestions
+    setTimeout(() => {
+      this.hideStartSuggestions();
+    }, 150);
+  }
+
+  onEndBlur() {
+    // Delay hiding to allow for click events on suggestions
+    setTimeout(() => {
+      this.hideEndSuggestions();
+    }, 150);
+  }
+
+  onStartKeyDown(event: KeyboardEvent) {
+    if (!this.showStartSuggestions || this.startSuggestions.length === 0) {
+      return;
+    }
+
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault();
+        this.selectedStartIndex = Math.min(this.selectedStartIndex + 1, this.startSuggestions.length - 1);
+        break;
+      case 'ArrowUp':
+        event.preventDefault();
+        this.selectedStartIndex = Math.max(this.selectedStartIndex - 1, -1);
+        break;
+      case 'Enter':
+        event.preventDefault();
+        if (this.selectedStartIndex >= 0 && this.selectedStartIndex < this.startSuggestions.length) {
+          this.selectStartSuggestion(this.startSuggestions[this.selectedStartIndex]);
+        }
+        break;
+      case 'Escape':
+        this.hideStartSuggestions();
+        break;
+    }
+  }
+
+  onEndKeyDown(event: KeyboardEvent) {
+    if (!this.showEndSuggestions || this.endSuggestions.length === 0) {
+      return;
+    }
+
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault();
+        this.selectedEndIndex = Math.min(this.selectedEndIndex + 1, this.endSuggestions.length - 1);
+        break;
+      case 'ArrowUp':
+        event.preventDefault();
+        this.selectedEndIndex = Math.max(this.selectedEndIndex - 1, -1);
+        break;
+      case 'Enter':
+        event.preventDefault();
+        if (this.selectedEndIndex >= 0 && this.selectedEndIndex < this.endSuggestions.length) {
+          this.selectEndSuggestion(this.endSuggestions[this.selectedEndIndex]);
+        }
+        break;
+      case 'Escape':
+        this.hideEndSuggestions();
+        break;
+    }
+  }
+
+  selectStartSuggestion(suggestion: any) {
+    this.startLocation = suggestion.display_name;
+    this.hideStartSuggestions();
+    this.distance = 0; // Reset distance
+  }
+
+  selectEndSuggestion(suggestion: any) {
+    this.endLocation = suggestion.display_name;
+    this.hideEndSuggestions();
+    this.distance = 0; // Reset distance
+  }
+
+  private hideStartSuggestions() {
+    this.showStartSuggestions = false;
+    this.selectedStartIndex = -1;
+  }
+
+  private hideEndSuggestions() {
+    this.showEndSuggestions = false;
+    this.selectedEndIndex = -1;
+  }
+
+  private hideAllSuggestions() {
+    this.hideStartSuggestions();
+    this.hideEndSuggestions();
   }
 }
