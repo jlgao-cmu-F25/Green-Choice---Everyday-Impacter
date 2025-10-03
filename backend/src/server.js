@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const dataStore = require('./config/dataStore');
 const actionRoutes = require('./routes/actionRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -17,6 +18,7 @@ console.log('Using in-memory data store');
 
 // Routes
 app.use('/api', actionRoutes);
+app.use('/api/users', userRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

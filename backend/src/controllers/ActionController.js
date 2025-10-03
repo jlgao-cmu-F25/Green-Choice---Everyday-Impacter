@@ -62,7 +62,7 @@ class ActionController {
 
       res.status(201).json({
         userAction,
-        user: updatedUser,
+        updatedUser,
         impact: {
           co2: co2SavedTotal,
           water: waterSavedTotal,
