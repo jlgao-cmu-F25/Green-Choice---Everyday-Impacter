@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-
+import { CommonModule } from '@angular/common';
 import { ApiService } from '../../services/api.service';
 import { AuthService, User } from '../../services/auth.service';
 import { EcoAction, UserStats, Impact } from '../../models/eco-action.model';
@@ -8,7 +8,7 @@ import { HeaderComponent } from "../header/header.component";
 @Component({
     selector: 'app-dashboard',
     standalone: true,
-    imports: [HeaderComponent],
+    imports: [CommonModule, HeaderComponent],
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.css']
 })
@@ -100,5 +100,29 @@ export class DashboardComponent implements OnInit {
       },
       error: (err) => console.error('Error logging action:', err)
     });
+  }
+
+  // Calculate trees saved based on CO2 saved
+  // Average tree absorbs about 21.77 kg of CO2 per year
+  calculateTreesSaved(co2Saved: number): number {
+    const co2PerTreePerYear = 21.77; // kg CO2 per tree per year
+    return co2Saved / co2PerTreePerYear;
+  }
+
+  getTreesMessage(treesSaved: number): string {
+    if (treesSaved < 0.1) {
+      return "You're getting started! Keep going! 🌱";
+    } else if (treesSaved < 0.5) {
+      return "You've helped a young sapling grow! 🌿";
+    } else if (treesSaved < 1) {
+      return "Almost a full tree's worth of CO₂ saved! 🌳";
+    } else if (treesSaved < 5) {
+      const trees = Math.floor(treesSaved);
+      return `Equivalent to ${trees} tree${trees > 1 ? 's' : ''} worth of CO₂ absorption! 🌲🌳`;
+    } else if (treesSaved < 10) {
+      return "You've saved a small forest! 🌲🌳🌲";
+    } else {
+      return "You're an environmental hero! 🌲🌳🌲🌿🌱";
+    }
   }
 }

@@ -121,6 +121,29 @@
           </div>
         </div>
       }
+      
+      <!-- Trees Saved Section -->
+      @if (userStats && userStats.totalCO2Saved > 0) {
+        <div class="trees-saved-section">
+          <div class="trees-hero">
+            <div class="trees-animation">
+              <span class="tree">🌲</span>
+              <span class="tree">🌳</span>
+              <span class="tree">🌿</span>
+              <span class="tree">🌱</span>
+            </div>
+            <h2 class="trees-title">CO2s you saved is equivalent to: </h2>
+            <div class="trees-count">
+              <span class="trees-number">{{ calculateTreesSaved(userStats.totalCO2Saved).toFixed(1) }}</span>
+              <span class="trees-label">Tree Equivalents</span>
+            </div>
+            <p class="trees-message">{{ getTreesMessage(calculateTreesSaved(userStats.totalCO2Saved)) }}</p>
+            <div class="trees-explanation">
+              <p>Based on the fact that an average tree absorbs ~22kg of CO₂ per year</p>
+            </div>
+          </div>
+        </div>
+      }
     </div>
   }
 </div>
