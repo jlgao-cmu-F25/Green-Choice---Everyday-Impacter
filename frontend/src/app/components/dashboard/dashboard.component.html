@@ -4,114 +4,122 @@
     <p class="tagline">Every small action counts!</p>
   </header>
 
-  <div *ngIf="loading" class="loading">Loading...</div>
+  @if (loading) {
+    <div class="loading">Loading...</div>
+  }
 
-  <div *ngIf="!loading">
-    <!-- Streak Display -->
-    <div class="streak-card" *ngIf="userStats">
-      <div class="streak-info">
-        <div class="streak-item">
-          <span class="streak-emoji">🔥</span>
-          <div>
-            <div class="streak-number">{{ userStats.currentStreak }}</div>
-            <div class="streak-label">Day Streak</div>
+  @if (!loading) {
+    <div>
+      <!-- Streak Display -->
+      @if (userStats) {
+        <div class="streak-card">
+          <div class="streak-info">
+            <div class="streak-item">
+              <span class="streak-emoji">🔥</span>
+              <div>
+                <div class="streak-number">{{ userStats.currentStreak }}</div>
+                <div class="streak-label">Day Streak</div>
+              </div>
+            </div>
+            <div class="streak-item">
+              <span class="streak-emoji">🏆</span>
+              <div>
+                <div class="streak-number">{{ userStats.longestStreak }}</div>
+                <div class="streak-label">Best Streak</div>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="streak-item">
-          <span class="streak-emoji">🏆</span>
-          <div>
-            <div class="streak-number">{{ userStats.longestStreak }}</div>
-            <div class="streak-label">Best Streak</div>
+      }
+      <!-- Impact Summary -->
+      <div class="impact-grid">
+        <div class="impact-card">
+          <h3>Today's Impact</h3>
+          <div class="impact-stats">
+            <div class="stat">
+              <span class="stat-icon">💨</span>
+              <span class="stat-value">{{ todayImpact.co2.toFixed(2) }} kg</span>
+              <span class="stat-label">CO₂ Saved</span>
+            </div>
+            <div class="stat">
+              <span class="stat-icon">💧</span>
+              <span class="stat-value">{{ todayImpact.water.toFixed(1) }} L</span>
+              <span class="stat-label">Water Saved</span>
+            </div>
+            <div class="stat">
+              <span class="stat-icon">♻️</span>
+              <span class="stat-value">{{ todayImpact.waste.toFixed(2) }} kg</span>
+              <span class="stat-label">Waste Reduced</span>
+            </div>
+          </div>
+        </div>
+        <div class="impact-card">
+          <h3>This Week</h3>
+          <div class="impact-stats">
+            <div class="stat">
+              <span class="stat-icon">💨</span>
+              <span class="stat-value">{{ weekImpact.co2.toFixed(2) }} kg</span>
+              <span class="stat-label">CO₂ Saved</span>
+            </div>
+            <div class="stat">
+              <span class="stat-icon">💧</span>
+              <span class="stat-value">{{ weekImpact.water.toFixed(1) }} L</span>
+              <span class="stat-label">Water Saved</span>
+            </div>
+            <div class="stat">
+              <span class="stat-icon">♻️</span>
+              <span class="stat-value">{{ weekImpact.waste.toFixed(2) }} kg</span>
+              <span class="stat-label">Waste Reduced</span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- Impact Summary -->
-    <div class="impact-grid">
-      <div class="impact-card">
-        <h3>Today's Impact</h3>
-        <div class="impact-stats">
-          <div class="stat">
-            <span class="stat-icon">💨</span>
-            <span class="stat-value">{{ todayImpact.co2.toFixed(2) }} kg</span>
-            <span class="stat-label">CO₂ Saved</span>
-          </div>
-          <div class="stat">
-            <span class="stat-icon">💧</span>
-            <span class="stat-value">{{ todayImpact.water.toFixed(1) }} L</span>
-            <span class="stat-label">Water Saved</span>
-          </div>
-          <div class="stat">
-            <span class="stat-icon">♻️</span>
-            <span class="stat-value">{{ todayImpact.waste.toFixed(2) }} kg</span>
-            <span class="stat-label">Waste Reduced</span>
-          </div>
+      <!-- Insights -->
+      @if (insights.length > 0) {
+        <div class="insights-card">
+          <h3>💡 Your Impact This Week</h3>
+          <ul class="insights-list">
+            @for (insight of insights; track insight) {
+              <li>{{ insight }}</li>
+            }
+          </ul>
+        </div>
+      }
+      <!-- Action Buttons -->
+      <div class="actions-section">
+        <h2>Log Your Eco-Actions</h2>
+        <div class="action-grid">
+          @for (action of ecoActions; track action) {
+            <button
+              class="action-button"
+              (click)="logAction(action)">
+              <span class="action-icon">{{ action.icon }}</span>
+              <span class="action-name">{{ action.name }}</span>
+              <span class="action-impact">-{{ action.co2Saved }} kg CO₂</span>
+            </button>
+          }
         </div>
       </div>
-
-      <div class="impact-card">
-        <h3>This Week</h3>
-        <div class="impact-stats">
-          <div class="stat">
-            <span class="stat-icon">💨</span>
-            <span class="stat-value">{{ weekImpact.co2.toFixed(2) }} kg</span>
-            <span class="stat-label">CO₂ Saved</span>
+      <!-- Total Impact -->
+      @if (userStats) {
+        <div class="total-impact">
+          <h3>All-Time Impact</h3>
+          <div class="total-stats">
+            <div class="total-stat">
+              <div class="total-value">{{ userStats.totalCO2Saved.toFixed(2) }}</div>
+              <div class="total-label">kg CO₂ saved</div>
+            </div>
+            <div class="total-stat">
+              <div class="total-value">{{ userStats.totalWaterSaved.toFixed(1) }}</div>
+              <div class="total-label">Liters water saved</div>
+            </div>
+            <div class="total-stat">
+              <div class="total-value">{{ userStats.totalWasteSaved.toFixed(2) }}</div>
+              <div class="total-label">kg waste reduced</div>
+            </div>
           </div>
-          <div class="stat">
-            <span class="stat-icon">💧</span>
-            <span class="stat-value">{{ weekImpact.water.toFixed(1) }} L</span>
-            <span class="stat-label">Water Saved</span>
-          </div>
-          <div class="stat">
-            <span class="stat-icon">♻️</span>
-            <span class="stat-value">{{ weekImpact.waste.toFixed(2) }} kg</span>
-            <span class="stat-label">Waste Reduced</span>
-          </div>
         </div>
-      </div>
+      }
     </div>
-
-    <!-- Insights -->
-    <div class="insights-card" *ngIf="insights.length > 0">
-      <h3>💡 Your Impact This Week</h3>
-      <ul class="insights-list">
-        <li *ngFor="let insight of insights">{{ insight }}</li>
-      </ul>
-    </div>
-
-    <!-- Action Buttons -->
-    <div class="actions-section">
-      <h2>Log Your Eco-Actions</h2>
-      <div class="action-grid">
-        <button
-          *ngFor="let action of ecoActions"
-          class="action-button"
-          (click)="logAction(action)">
-          <span class="action-icon">{{ action.icon }}</span>
-          <span class="action-name">{{ action.name }}</span>
-          <span class="action-impact">-{{ action.co2Saved }} kg CO₂</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Total Impact -->
-    <div class="total-impact" *ngIf="userStats">
-      <h3>All-Time Impact</h3>
-      <div class="total-stats">
-        <div class="total-stat">
-          <div class="total-value">{{ userStats.totalCO2Saved.toFixed(2) }}</div>
-          <div class="total-label">kg CO₂ saved</div>
-        </div>
-        <div class="total-stat">
-          <div class="total-value">{{ userStats.totalWaterSaved.toFixed(1) }}</div>
-          <div class="total-label">Liters water saved</div>
-        </div>
-        <div class="total-stat">
-          <div class="total-value">{{ userStats.totalWasteSaved.toFixed(2) }}</div>
-          <div class="total-label">kg waste reduced</div>
-        </div>
-      </div>
-    </div>
-  </div>
+  }
 </div>

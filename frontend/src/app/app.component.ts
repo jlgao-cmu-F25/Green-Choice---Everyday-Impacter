@@ -3,20 +3,15 @@ import { RouterOutlet } from '@angular/router';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [RouterOutlet, DashboardComponent],
-  template: `
-    <app-dashboard></app-dashboard>
-    <router-outlet />
+    selector: 'app-root',
+    imports: [RouterOutlet, DashboardComponent],
+    template: `
+    <div class="block min-h-screen bg-gray-50">
+      <app-dashboard></app-dashboard>
+      <router-outlet />
+    </div>
   `,
-  styles: [`
-    :host {
-      display: block;
-      min-height: 100vh;
-      background: #f5f7fa;
-    }
-  `],
+    styles: []
 })
 export class AppComponent {
   title = 'everyday-impact-frontend';
