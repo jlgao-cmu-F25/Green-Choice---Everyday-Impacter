@@ -4,11 +4,10 @@ import { ApiService } from '../../services/api.service';
 import { EcoAction, UserStats, Impact } from '../../models/eco-action.model';
 
 @Component({
-  selector: 'app-dashboard',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css']
+    selector: 'app-dashboard',
+    imports: [CommonModule],
+    templateUrl: './dashboard.component.html',
+    styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
   userId = 'demo-user'; // For hackathon, using a default user
