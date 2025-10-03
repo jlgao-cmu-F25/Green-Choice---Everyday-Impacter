@@ -6,16 +6,12 @@ import { DashboardComponent } from './components/dashboard/dashboard.component';
     selector: 'app-root',
     imports: [RouterOutlet, DashboardComponent],
     template: `
-    <app-dashboard></app-dashboard>
-    <router-outlet />
+    <div class="block min-h-screen bg-gray-50">
+      <app-dashboard></app-dashboard>
+      <router-outlet />
+    </div>
   `,
-    styles: [`
-    :host {
-      display: block;
-      min-height: 100vh;
-      background: #f5f7fa;
-    }
-  `]
+    styles: []
 })
 export class AppComponent {
   title = 'everyday-impact-frontend';
