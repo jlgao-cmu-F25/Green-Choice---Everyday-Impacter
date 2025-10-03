@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ApiService } from '../../services/api.service';
 import { EcoAction, UserStats, Impact } from '../../models/eco-action.model';
 
 @Component({
     selector: 'app-dashboard',
-    imports: [CommonModule],
+    imports: [],
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.css']
 })
